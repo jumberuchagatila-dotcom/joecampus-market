@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JoeCampus Market</title>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: url('background.jpeg') center/cover no-repeat fixed;
+  color: white;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26, 26, 46, 0.88);
+  z-index: -1;
+}
+
+body.auth-active {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+body.app-active {
+  overflow-y: auto;
+  position: static;
+  height: auto;
+}
+
+.container { max-width: 550px; margin: auto; width: 100%; padding: 15px; }
+
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 18px;
+  margin: 10px 0;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  width: 100%;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 14px 16px;
+  margin: 8px 0;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  font-size: 15px;
+  transition: all 0.3s;
+  outline: none;
+  max-width: 100%;
+}
+
+input::placeholder, textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+input:focus, textarea:focus, select:focus {
+  border-color: #f9ab00;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 20px rgba(249, 171, 0, 0.15);
+}
+
+select { color: white; }
+select option { background: #16213e; color: white; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 6px 0;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f9ab00, #ff6b00);
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 0.5px;
+}
+
+button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(249, 171, 0, 0.4); }
+button:active { transform: translateY(0); }
+button.secondary { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); }
+button.danger { background: linear-gradient(135deg, #ff4444, #cc0000); }
+button.edit-btn { background: linear-gradient(135deg, #2196F3, #1976D2); font-size: 12px; padding: 8px 14px; }
+button.chat-btn { background: linear-gradient(135deg, #25D366, #128C7E); font-size: 12px; padding: 8px 14px; }
+button.small-btn { font-size: 11px; padding: 8px 10px; }
+
+.auth-screen-wrapper {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 15px;
+  overflow: hidden;
+}
+
+.auth-screen-wrapper .glass {
+  max-width: 450px;
+  width: 100%;
+  max-height: 95vh;
+  overflow-y: auto;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.menu-btn {
+  width: 40px !important;
+  height: 40px;
+  padding: 0 !important;
+  font-size: 20px !important;
+  border-radius: 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-logo {
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.header-title {
+  color: #f9ab00;
+  font-weight: bold;
+  font-size: 15px;
+  word-wrap: break-word;
+}
+
+.side-menu-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+  display: none;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0; left: -300px;
+  width: 280px;
+  height: 100%;
+  background: #1a1a2e;
+  z-index: 201;
+  transition: left 0.3s ease;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.side-menu.open { left: 0; }
+.side-menu-overlay.open { display: block; }
+
+.side-menu h3 { color: #f9ab00; margin-bottom: 15px; font-size: 18px; text-align: center; }
+
+.side-menu button {
+  display: block;
+  margin: 5px 0;
+  padding: 14px;
+  font-size: 15px;
+  text-align: left;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+}
+
+.side-menu button:hover { background: rgba(249,171,0,0.2); }
+
+.side-menu .menu-divider { border-top: 1px solid rgba(255,255,255,0.15); margin: 10px 0; }
+
+.side-menu .lang-selector { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 10px; margin: 8px 0; }
+.side-menu .lang-selector select { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 10px; }
+
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  padding: 12px 24px; border-radius: 25px; font-weight: bold; font-size: 14px;
+  z-index: 1000; animation: slideDown 0.4s ease; text-align: center;
+  max-width: 90vw; word-wrap: break-word;
+}
+
+.toast.success { background: #4CAF50; color: white; }
+.toast.error { background: #f44336; color: white; }
+.toast.info { background: #2196F3; color: white; }
+
+.spinner {
+  display: inline-block; width: 22px; height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.3); border-radius: 50%;
+  border-top-color: #f9ab00; animation: spin 0.7s linear infinite;
+}
+
+.loading-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 999;
+}
+
+.loading-box { background: rgba(22,33,62,0.95); padding: 25px 35px; border-radius: 18px; text-align: center; max-width: 90vw; }
+.loading-box p { margin-top: 10px; font-weight: bold; }
+
+.badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+.badge.available { background: #4CAF50; color: white; }
+.badge.sold { background: #f44336; color: white; }
+.badge.pending { background: #ff9800; color: white; }
+.badge.admin-badge { background: #9b59b6; color: white; }
+
+.product-card {
+  background: rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 16px; margin: 14px 0;
+  border: 1px solid rgba(255, 255, 255, 0.08); animation: fadeUp 0.35s ease; transition: all 0.3s; width: 100%;
+}
+
+.product-card:hover { border-color: rgba(249, 171, 0, 0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+
+.product-card img {
+  width: 100%; height: auto; max-height: 220px; object-fit: cover;
+  border-radius: 12px; margin-bottom: 12px; background: rgba(0,0,0,0.3);
+}
+
+.product-card h3 { margin: 8px 0; color: #f9ab00; font-size: 18px; }
+.product-card .desc { font-size: 13px; opacity: 0.8; margin: 6px 0; word-wrap: break-word; }
+.product-card .price { font-size: 22px; font-weight: bold; color: #4CAF50; margin: 10px 0; }
+.product-card .seller-info { font-size: 12px; opacity: 0.65; margin: 6px 0; }
+.product-card .actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.product-card .actions button { flex: 1 1 auto; min-width: 60px; font-size: 11px; }
+
+.order-card {
+  background: rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 14px; margin: 10px 0;
+  border-left: 4px solid #f9ab00; width: 100%;
+}
+
+.search-box { position: relative; margin-bottom: 15px; width: 100%; }
+.search-box input { padding-left: 45px; background: rgba(255,255,255,0.1); border-radius: 25px; font-size: 14px; }
+.search-box .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; opacity: 0.7; }
+
+.auth-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
+.auth-tabs button {
+  flex: 1; padding: 12px; font-size: 14px; border-radius: 12px;
+  background: rgba(255,255,255,0.08); color: white;
+  border: 1px solid rgba(255,255,255,0.15); font-weight: bold; cursor: pointer; transition: all 0.3s;
+}
+.auth-tabs button.active { background: linear-gradient(135deg, #f9ab00, #ff6b00); border-color: transparent; box-shadow: 0 4px 15px rgba(249,171,0,0.3); }
+
+.logo-img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; display: block; margin: 0 auto 12px auto; border: 2px solid rgba(249,171,0,0.4); }
+
+.profile-pic { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #f9ab00; }
+.profile-pic-placeholder {
+  width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid #f9ab00; margin: auto;
+}
+
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center; z-index: 1001; padding: 15px;
+}
+
+.modal-box {
+  background: #1a1a2e; border-radius: 18px; padding: 20px;
+  width: 100%; max-width: 420px; border: 1px solid rgba(255,255,255,0.15); max-height: 90vh; overflow-y: auto;
+}
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 10px 0; }
+.stat-card { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+.stat-card .stat-number { font-size: 28px; font-weight: bold; color: #f9ab00; }
+.stat-card .stat-label { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.admin-table td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); word-break: break-word; }
+
+.chat-bubble-mine { margin: 8px 0; padding: 10px 14px; border-radius: 16px; max-width: 80%; word-wrap: break-word; background: linear-gradient(135deg,#f9ab00,#ff6b00); margin-left: auto; text-align: right; }
+.chat-bubble-theirs { margin: 8px 0; padding: 10px 14px; border-radius: 16px; max-width: 80%; word-wrap: break-word; background: rgba(255,255,255,0.1); margin-right: auto; text-align: left; }
+
+.content-page { line-height: 1.7; }
+.content-page h3 { color: #f9ab00; margin: 15px 0 8px 0; }
+.content-page p { margin: 8px 0; opacity: 0.9; }
+
+hr { opacity: 0.15; margin: 15px 0; border: none; border-top: 1px solid rgba(255,255,255,0.2); }
+small { display: block; font-size: 11px; opacity: 0.6; margin: 3px 0; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 0.8; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideDown { from { opacity: 0; transform: translate(-50%, -50px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.subtitle-fade { animation: fadeInUp 1s ease 1.5s both; text-align: center; font-size: 13px; opacity: 0.8; margin-bottom: 12px; }
+.empty-state { text-align: center; padding: 30px 15px; opacity: 0.7; }
+.empty-state .icon { font-size: 45px; margin-bottom: 10px; }
+
+@media (max-width: 400px) {
+  .product-card img { max-height: 160px; }
+  .product-card h3 { font-size: 16px; }
+  .product-card .price { font-size: 18px; }
+  .product-card .actions button { font-size: 10px; padding: 7px 4px; min-width: 45px; }
+  .stat-card .stat-number { font-size: 22px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .profile-pic, .profile-pic-placeholder { width: 70px; height: 70px; font-size: 30px; }
+  .chat-bubble-mine, .chat-bubble-theirs { max-width: 90%; font-size: 13px; }
+  .side-menu { width: 260px; }
+}
+</style>
+</head>
+<body class="auth-active">
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen" class="auth-screen-wrapper">
+  <div class="glass">
+    <img src="logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+    <h2 style="text-align:center;margin-bottom:5px;">
+      <span style="color:#f9ab00;font-weight:bold;">JoeCampus</span>
+      <span style="color:white;"> Market</span>
+    </h2>
+    <p class="subtitle-fade">Nunua na Uuze bidhaa vyuoni kwa urahisi</p>
+
+    <div class="auth-tabs">
+      <button id="tab-register-btn" class="active" onclick="switchAuthTab('register')">📝 Jisajili</button>
+      <button id="tab-login-btn" onclick="switchAuthTab('login')">🔑 Ingia</button>
+    </div>
+
+    <div id="register-form">
+      <input id="reg-name" placeholder="Jina Kamili *">
+      <input id="reg-phone" placeholder="Namba ya Simu *">
+      <input id="reg-email" type="email" placeholder="Barua Pepe *">
+      <input id="reg-password" type="password" placeholder="Nywila (Angalau herufi 8) *">
+      <select id="reg-role">
+        <option value="buyer">Mwanafunzi - Nataka Kununua</option>
+        <option value="seller">Mwanafunzi - Nataka Kuuza</option>
+      </select>
+      <button onclick="handleRegister()">📝 Jisajili</button>
+    </div>
+
+    <div id="login-form" style="display:none;">
+      <input id="login-email" type="email" placeholder="Barua Pepe *">
+      <input id="login-password" type="password" placeholder="Nywila *">
+      <button onclick="handleLogin()">🔑 Ingia</button>
+    </div>
+
+    <p style="text-align:center;font-size:11px;opacity:0.5;margin-top:12px;">Kwa kutumia huduma hii unakubali masharti yetu</p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app-screen" style="display:none;">
+  <div class="container">
+    <div class="glass">
+      <div class="app-header">
+        <button class="menu-btn secondary" onclick="toggleMenu()">☰</button>
+        <img src="logo.jpeg" alt="Logo" class="header-logo" onerror="this.style.display='none'">
+        <span class="header-title" id="welcome-msg">JoeCampus Market</span>
+        <span id="admin-badge" style="display:none;margin-left:auto;"><span class="badge admin-badge">Admin</span></span>
+      </div>
+    </div>
+
+    <div id="tab-market" class="glass">
+      <h4 style="margin-bottom:5px;">📱 Bidhaa Zinazouzwa</h4>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input id="search-input" placeholder="Tafuta bidhaa kwa jina..." oninput="handleSearch()">
+      </div>
+      <div id="products-container"></div>
+    </div>
+
+    <div id="tab-sell" class="glass" style="display:none;">
+      <h4 style="margin-bottom:10px;">➕ Weka Bidhaa Mpya</h4>
+      <input id="product-name" placeholder="Jina la Bidhaa *">
+      <input id="product-price" type="number" placeholder="Bei (TZS) *" min="100" step="100">
+      <textarea id="product-desc" placeholder="Maelezo ya bidhaa" rows="2"></textarea>
+      <input type="file" id="product-image" accept="image/*">
+      <small>Picha isizidi 5MB | JPG, PNG, WEBP</small>
+      <button onclick="handleUploadProduct()">📤 Pakia Bidhaa</button>
+      <hr>
+      <h5>📋 Bidhaa Zangu</h5>
+      <div id="my-products-container"></div>
+    </div>
+
+    <div id="tab-orders" class="glass" style="display:none;">
+      <h4 style="margin-bottom:10px;">📦 Maagizo Yangu</h4>
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+        <button onclick="loadMyOrders('buyer')" class="small-btn" style="flex:1;">🛒 Nimenunua</button>
+        <button onclick="loadMyOrders('seller')" class="small-btn" style="flex:1;">💰 Nimeuza</button>
+        <button onclick="loadMyOrders('all')" class="small-btn" style="flex:1;">📋 Zote</button>
+      </div>
+      <div id="orders-container"></div>
+    </div>
+
+    <div id="tab-profile" class="glass" style="display:none;">
+      <h4 style="margin-bottom:10px;">👤 Profaili Yangu</h4>
+      <div id="profile-info"></div>
+    </div>
+
+    <div id="tab-admin" class="glass" style="display:none;">
+      <h4 style="margin-bottom:10px;">👑 Admin Panel</h4>
+      <div id="admin-stats" class="stats-grid"></div>
+      <hr>
+      <h5 style="margin-bottom:8px;">👥 Watumiaji Wote</h5>
+      <div id="admin-users-container" style="max-height:400px;overflow-y:auto;"></div>
+      <hr>
+      <h5 style="margin-bottom:8px;">📦 Bidhaa Zote</h5>
+      <div id="admin-products-container" style="max-height:400px;overflow-y:auto;"></div>
+    </div>
+
+    <div id="tab-chat" class="glass" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <button onclick="closeChat()" class="secondary" style="width:auto;padding:8px 14px;font-size:13px;">⬅️ Rudi</button>
+        <span id="chat-partner-name" style="font-weight:bold;color:#f9ab00;"></span>
+        <button onclick="loadChatMessages()" class="secondary" style="width:auto;padding:8px 14px;font-size:13px;">🔄 Refresh</button>
+      </div>
+      <small id="chat-product-info" style="display:block;text-align:center;opacity:0.7;margin-bottom:10px;"></small>
+      <div id="chat-messages" style="max-height:350px;overflow-y:auto;padding:8px;background:rgba(0,0,0,0.2);border-radius:12px;margin-bottom:10px;min-height:200px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input id="chat-message-input" placeholder="Andika ujumbe...">
+        <button onclick="sendChatMessage()" style="width:auto;padding:14px 20px;">📤</button>
+      </div>
+    </div>
+
+    <div id="tab-about" class="glass content-page" style="display:none;">
+      <h4 style="margin-bottom:10px;color:#f9ab00;">🏫 JOECAMPUS MARKET</h4>
+      <h3>Kuhusu Sisi</h3>
+      <p>JoeCampus Market ni jukwaa la mtandaoni linalowawezesha wanafunzi wa vyuo vikuu kununua na kuuza bidhaa kwa urahisi ndani ya chuo.</p>
+      <h3>Dira Yetu</h3>
+      <p>Kuwa jukwaa namba moja la biashara za wanafunzi vyuoni Tanzania.</p>
+      <h3>Malengo Yetu</h3>
+      <ul>
+        <li>Kuwawezesha wanafunzi kujipatia kipato kupitia biashara</li>
+        <li>Kurahisisha upatikanaji wa bidhaa vyuoni</li>
+        <li>Kujenga jumuiya ya wanafunzi wajasiriamali</li>
+      </ul>
+      <h3>Kwa Nini JoeCampus?</h3>
+      <ul>
+        <li>✅ Haina gharama yoyote kujisajili</li>
+        <li>✅ Inafanya kazi kwa simu yoyote</li>
+        <li>✅ Salama na inaaminika</li>
+        <li>✅ Fursa kwa wanafunzi wote</li>
+      </ul>
+      <h3>Timu Yetu</h3>
+      <p><strong>Joseph Ruchagatila</strong> - Mwanzilishi & Developer</p>
+      <h3>Mawasiliano</h3>
+      <p>📧 Email: ruchagatilajoseph7@gmail.com</p>
+      <p>📞 Simu: 0624887209</p>
+      <p style="margin-top:15px;text-align:center;opacity:0.7;">Toleo: 1.0 | © 2026 JoeCampus Market</p>
+    </div>
+
+    <div id="tab-help" class="glass content-page" style="display:none;">
+      <h4 style="margin-bottom:10px;color:#f9ab00;">🆘 MSAADA</h4>
+      <h3>Maswali ya Mara kwa Mara (FAQs)</h3>
+      <p><strong>🔐 Jinsi ya Kujisajili?</strong></p>
+      <p>Jaza fomu ya kujisajili kwa jina, simu, email na nywila. Kisha ingia kwa email na nywila ulizojisajili.</p>
+      <p><strong>📦 Jinsi ya Kuweka Bidhaa?</strong></p>
+      <p>Nenda kwenye "Uza", jaza jina, bei, na picha ya bidhaa. Bidhaa itaonekana kwenye soko mara moja.</p>
+      <p><strong>🛒 Jinsi ya Kununua Bidhaa?</strong></p>
+      <p>Bonyeza "Nunua" kwenye bidhaa unayotaka. Muuzaji atawasiliana nawe kwa simu au chat.</p>
+      <p><strong>💬 Jinsi ya Kuwasiliana na Muuzaji?</strong></p>
+      <p>Bonyeza "Chat" kwenye bidhaa, andika ujumbe wako. Muuzaji atapata taarifa na kukujibu.</p>
+      <p><strong>🗑️ Jinsi ya Kufuta Bidhaa?</strong></p>
+      <p>Nenda kwenye "Bidhaa Zangu", bonyeza "Futa". Bidhaa itaondolewa kwenye soko.</p>
+      <p><strong>❌ Jinsi ya Kufuta Akaunti?</strong></p>
+      <p>Nenda "Profaili", bonyeza "Futa Akaunti". Onyo: Hii haiwezi kutenduliwa!</p>
+      <hr>
+      <p><strong>📞 Hitaji Msaada Zaidi?</strong></p>
+      <p>📧 Email: ruchagatilajoseph7@gmail.com</p>
+      <p>📞 Simu: 0624887209</p>
+      <p>⏰ Saa za Kazi: Jumatatu - Ijumaa, 8:00 - 17:00</p>
+    </div>
+  </div>
+</div>
+
+<!-- SIDE MENU -->
+<div id="side-menu-overlay" class="side-menu-overlay" onclick="toggleMenu()"></div>
+<div id="side-menu" class="side-menu">
+  <h3>JoeCampus Market</h3>
+  <button onclick="navigateFromMenu('market')">🏪 Soko</button>
+  <button onclick="navigateFromMenu('sell')">➕ Uza</button>
+  <button onclick="navigateFromMenu('orders')">📦 Agizo</button>
+  <button onclick="navigateFromMenu('profile')">👤 Profaili</button>
+  <button onclick="navigateFromMenu('admin')" id="menu-admin-btn" style="display:none;">👑 Admin</button>
+  <div class="menu-divider"></div>
+  <button onclick="navigateFromMenu('help')">❓ Msaada</button>
+  <button onclick="navigateFromMenu('about')">ℹ️ Kuhusu Sisi</button>
+  <div class="menu-divider"></div>
+  <div class="lang-selector">
+    <span style="font-size:12px;opacity:0.7;">🌐 Lugha / Language</span>
+    <select id="lang-select" onchange="changeLanguage(this.value)">
+      <option value="sw">🇹🇿 Kiswahili</option>
+      <option value="en">🇬🇧 English</option>
+    </select>
+  </div>
+  <div class="menu-divider"></div>
+  <button onclick="handleLogout()" class="danger">🚪 Toka</button>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<!-- LOADING -->
+<div id="loading-overlay" class="loading-overlay" style="display:none;">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p id="loading-text">Tafadhali subiri...</p>
+  </div>
+</div>
+
+<!-- EDIT PRODUCT MODAL -->
+<div id="edit-product-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <h4 style="margin-bottom:10px;">✏️ Badilisha Bidhaa</h4>
+    <input id="edit-product-name" placeholder="Jina la Bidhaa">
+    <input id="edit-product-price" type="number" placeholder="Bei (TZS)">
+    <textarea id="edit-product-desc" placeholder="Maelezo" rows="2"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button onclick="saveEditProduct()" style="flex:1;">💾 Hifadhi</button>
+      <button onclick="closeEditModal()" class="secondary" style="flex:1;">❌ Ghairi</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div id="edit-profile-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <h4 style="margin-bottom:10px;">✏️ Badilisha Profaili</h4>
+    <div style="text-align:center;margin-bottom:10px;">
+      <img id="edit-profile-preview" src="" alt="Profile" class="profile-pic" style="display:none;">
+      <div id="edit-profile-placeholder" class="profile-pic-placeholder" style="display:none;">👤</div>
+    </div>
+    <input type="file" id="edit-profile-image" accept="image/*">
+    <small>Picha ya profaili</small>
+    <input id="edit-profile-name" placeholder="Jina Kamili">
+    <input id="edit-profile-phone" placeholder="Namba ya Simu">
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button onclick="saveEditProfile()" style="flex:1;">💾 Hifadhi</button>
+      <button onclick="closeProfileModal()" class="secondary" style="flex:1;">❌ Ghairi</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script type="module">
+import { Client, Account, Databases, Storage, Query, ID } from "https://cdn.jsdelivr.net/npm/appwrite@17/dist/esm/sdk.js";
+
+// ==================== APPWRITE CONFIG ====================
+const client = new Client()
+  .setEndpoint('https://fra.cloud.appwrite.io/v1')
+  .setProject('69fe581f00041f783b57');
+
+const account   = new Account(client);
+const databases = new Databases(client);
+const storage   = new Storage(client);
+
+const DATABASE_ID = '69fe593c000e2905885d';
+const COLLECTIONS = {
+  users: 'userid',
+  products: 'products',
+  orders: 'orders',
+  notifications: 'notifications',
+  messages: 'messages'
+};
+const BUCKET_ID = '69fe5ae7000bfa19975d';
+
+let currentUser = null, currentUserProfile = null;
+let editingProductId = null, editingProfilePicFile = null;
+let allProductsCache = [];
+let currentChatPartner = null, currentChatProduct = null;
+
+// ==================== UTILS ====================
+function showToast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+function showLoading(msg = 'Tafadhali subiri...') {
+  document.getElementById('loading-text').textContent = msg;
+  document.getElementById('loading-overlay').style.display = 'flex';
+}
+function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
+function val(id) { return document.getElementById(id).value.trim(); }
+function formatPrice(p) { return Number(p).toLocaleString('sw-TZ'); }
+function formatDate(d) {
+  if (!d) return 'Hivi karibuni';
+  return new Date(d).toLocaleDateString('sw-TZ', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+// ==================== SIDE MENU ====================
+window.toggleMenu = () => {
+  const menu = document.getElementById('side-menu');
+  const overlay = document.getElementById('side-menu-overlay');
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) { menu.classList.remove('open'); overlay.classList.remove('open'); }
+  else { menu.classList.add('open'); overlay.classList.add('open'); }
+};
+
+window.navigateFromMenu = (tabName) => {
+  toggleMenu();
+  if (tabName === 'admin' && currentUserProfile?.role !== 'admin') { showToast('Huna ruhusa', 'error'); return; }
+  showTab(tabName);
+};
+
+// ==================== AUTH TABS ====================
+window.switchAuthTab = (tab) => {
+  document.getElementById('tab-register-btn').classList.toggle('active', tab === 'register');
+  document.getElementById('tab-login-btn').classList.toggle('active', tab === 'login');
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+};
+
+// ==================== REGISTER ====================
+window.handleRegister = async () => {
+  const name = val('reg-name'), phone = val('reg-phone'), email = val('reg-email');
+  const password = val('reg-password'), role = val('reg-role');
+  if (!name || !phone || !email || !password) { showToast('Jaza sehemu zote', 'error'); return; }
+  if (name.length < 2) { showToast('Jina ni fupi', 'error'); return; }
+  if (!isValidEmail(email)) { showToast('Barua pepe si sahihi', 'error'); return; }
+  if (password.length < 8) { showToast('Nywila iwe na herufi 8+', 'error'); return; }
+  showLoading();
+  try {
+    const newUser = await account.create(ID.unique(), email, password, name);
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.users, ID.unique(), {
+      userId: newUser.$id, name, phone, email, role, isActive: true, profilePic: ''
+    });
+    showToast('Umesajiliwa! Sasa ingia kwenye Login ✅', 'success');
+    ['reg-name','reg-phone','reg-email','reg-password'].forEach(id => document.getElementById(id).value = '');
+    switchAuthTab('login');
+    document.getElementById('login-email').value = email;
+  } catch (e) { showToast(e.code === 409 ? 'Email imeshatumika. Ingia.' : 'Imeshindwa: ' + (e.message || 'Jaribu tena'), 'error'); }
+  finally { hideLoading(); }
+};
+
+// ==================== LOGIN ====================
+window.handleLogin = async () => {
+  const email = val('login-email'), password = val('login-password');
+  if (!email || !password) { showToast('Weka email na password', 'error'); return; }
+  showLoading();
+  try {
+    await account.createEmailPasswordSession(email, password);
+    const user = await account.get();
+    showToast('Karibu! 👋', 'success');
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+    await initApp(user);
+  } catch (e) { showToast(e.code === 404 ? 'Hakuna akaunti. Jisajili.' : 'Imeshindwa kuingia', 'error'); }
+  finally { hideLoading(); }
+};
+
+// ==================== LOGOUT ====================
+window.handleLogout = async () => {
+  try { await account.deleteSession('current'); } catch (e) {}
+  currentUser = null; currentUserProfile = null; allProductsCache = [];
+  currentChatPartner = null; currentChatProduct = null; editingProductId = null; editingProfilePicFile = null;
+  document.body.classList.remove('app-active'); document.body.classList.add('auth-active');
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+  ['market','sell','orders','profile','admin','chat','about','help'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`); if (el) el.style.display = 'none';
+  });
+  document.getElementById('side-menu').classList.remove('open');
+  document.getElementById('side-menu-overlay').classList.remove('open');
+  document.getElementById('admin-badge').style.display = 'none';
+  document.getElementById('menu-admin-btn').style.display = 'none';
+  switchAuthTab('login');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  showToast('Umetoka kwenye akaunti', 'info');
+};
+
+// ==================== DELETE ACCOUNT ====================
+window.handleDeleteAccount = async () => {
+  if (!confirm('Una uhakika unataka kufuta akaunti yako? Hii haiwezi kutenduliwa!')) return;
+  showLoading();
+  try {
+    const myProds = await databases.listDocuments(DATABASE_ID, COLLECTIONS.products, [Query.equal('sellerId', currentUser.$id)]);
+    for (const p of myProds.documents) await databases.deleteDocument(DATABASE_ID, COLLECTIONS.products, p.$id);
+    const myOrders = await databases.listDocuments(DATABASE_ID, COLLECTIONS.orders, [Query.equal('buyerId', currentUser.$id)]);
+    for (const o of myOrders.documents) await databases.deleteDocument(DATABASE_ID, COLLECTIONS.orders, o.$id);
+    if (currentUserProfile) await databases.deleteDocument(DATABASE_ID, COLLECTIONS.users, currentUserProfile.$id);
+    showToast('Akaunti imefutwa kikamilifu', 'success');
+    currentUser = null; currentUserProfile = null;
+    document.body.classList.remove('app-active'); document.body.classList.add('auth-active');
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app-screen').style.display = 'none';
+    switchAuthTab('register');
+  } catch (e) { showToast('Imeshindwa kufuta', 'error'); }
+  finally { hideLoading(); }
+};
+
+// ==================== INIT APP ====================
+async function initApp(user) {
+  currentUser = user;
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.users, [Query.equal('userId', user.$id)]);
+    if (res.documents.length > 0) currentUserProfile = res.documents[0];
+  } catch (e) {}
+  document.body.classList.remove('auth-active'); document.body.classList.add('app-active');
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('welcome-msg').innerHTML = `👋 Karibu, ${currentUserProfile?.name || user.name || 'Mwanafunzi'}!`;
+  if (currentUserProfile?.role === 'admin') {
+    document.getElementById('admin-badge').style.display = 'inline';
+    document.getElementById('menu-admin-btn').style.display = 'block';
+  } else {
+    document.getElementById('admin-badge').style.display = 'none';
+    document.getElementById('menu-admin-btn').style.display = 'none';
+  }
+  showTab('market');
+}
+
+async function checkAuth() {
+  try { const user = await account.get(); if (user) { await initApp(user); return; } } catch (e) {}
+  document.body.classList.remove('app-active'); document.body.classList.add('auth-active');
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+  switchAuthTab('login');
+}
+checkAuth();
+
+// ==================== TABS ====================
+window.showTab = (tabName) => {
+  ['market','sell','orders','profile','admin','chat','about','help'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`); if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById(`tab-${tabName}`); if (target) target.style.display = 'block';
+  if (tabName === 'market') loadProducts();
+  if (tabName === 'sell') loadMyProducts();
+  if (tabName === 'orders') loadMyOrders('all');
+  if (tabName === 'profile') loadProfile();
+  if (tabName === 'admin') loadAdminPanel();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// ==================== SEARCH ====================
+window.handleSearch = () => {
+  const query = val('search-input').toLowerCase();
+  const container = document.getElementById('products-container');
+  if (!allProductsCache.length) return;
+  const filtered = query ? allProductsCache.filter(p => p.name.toLowerCase().includes(query)) : allProductsCache;
+  renderProducts(filtered, container);
+};
+
+// ==================== PRODUCTS ====================
+window.handleUploadProduct = async () => {
+  const name = val('product-name'), price = val('product-price'), desc = val('product-desc');
+  const file = document.getElementById('product-image').files[0];
+  if (!name || !price || !file) { showToast('Jaza jina, bei na picha', 'error'); return; }
+  if (Number(price) < 100) { showToast('Bei iwe 100+', 'error'); return; }
+  if (!file.type.startsWith('image/')) { showToast('Chagua picha', 'error'); return; }
+  if (file.size > 5*1024*1024) { showToast('Picha ni kubwa (max 5MB)', 'error'); return; }
+  showLoading();
+  try {
+    const up = await storage.createFile(BUCKET_ID, ID.unique(), file);
+    const url = storage.getFileView(BUCKET_ID, up.$id).toString();
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.products, ID.unique(), {
+      name, price: Number(price), description: desc || '', imageUrl: url,
+      sellerId: currentUser.$id, sellerName: currentUserProfile?.name || 'Mwanafunzi',
+      sellerPhone: currentUserProfile?.phone || '', status: 'available'
+    });
+    showToast('Bidhaa imepakiwa! 🎉', 'success');
+    document.getElementById('product-name').value = ''; document.getElementById('product-price').value = '';
+    document.getElementById('product-desc').value = ''; document.getElementById('product-image').value = '';
+    loadProducts(); loadMyProducts();
+  } catch (e) { showToast('Imeshindwa: ' + (e.message || 'Jaribu tena'), 'error'); }
+  finally { hideLoading(); }
+};
+
+window.loadProducts = async () => {
+  const container = document.getElementById('products-container');
+  container.innerHTML = '<div style="text-align:center;padding:20px;"><div class="spinner"></div></div>';
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.products, [
+      Query.equal('status','available'), Query.orderDesc('$createdAt')
+    ]);
+    allProductsCache = res.documents;
+    renderProducts(allProductsCache, container);
+  } catch (e) { container.innerHTML = '<div class="empty-state"><p style="color:#ff6b6b;">❌ Imeshindwa</p><button onclick="loadProducts()" class="secondary">🔄 Jaribu</button></div>'; }
+};
+
+function renderProducts(products, container) {
+  if (!products.length) { container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Hakuna bidhaa</p></div>'; return; }
+  container.innerHTML = '';
+  products.forEach(p => {
+    const isOwner = p.sellerId === currentUser?.$id;
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      <img src="${p.imageUrl}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x200/16213e/f9ab00?text=Bidhaa'">
+      <span class="badge available">Inapatikana</span>
+      <h3>${p.name}</h3>
+      ${p.description ? `<p class="desc">${p.description}</p>` : ''}
+      <div class="price">TZS ${formatPrice(p.price)}</div>
+      <div class="seller-info">📞 ${p.sellerPhone || 'Haipo'} | 👤 ${p.sellerName || 'Mwanafunzi'}</div>
+      <div class="actions">
+        ${!isOwner ? `
+          <button onclick="handleBuy('${p.$id}','${p.sellerId}','${p.name.replace(/'/g,"\\'")}',${p.price})">🛒 Nunua</button>
+          <button onclick="openChat('${p.sellerId}','${p.sellerName.replace(/'/g,"\\'")}','${p.$id}','${p.name.replace(/'/g,"\\'")}')" class="chat-btn">💬 Chat</button>
+        ` : `
+          <button onclick="handleMarkSold('${p.$id}')" class="secondary">✅ Imekwisha</button>
+          <button onclick="openEditModal('${p.$id}')" class="edit-btn">✏️</button>
+          <button onclick="handleDeleteProduct('${p.$id}')" class="danger" style="font-size:11px;">🗑️</button>
+        `}
+      </div>
+      <small style="opacity:0.5;">📅 ${formatDate(p.$createdAt)}</small>`;
+    container.appendChild(card);
+  });
+}
+
+window.loadMyProducts = async () => {
+  const container = document.getElementById('my-products-container');
+  if (!currentUser) return;
+  container.innerHTML = '<p style="text-align:center;opacity:0.7;">Inapakia...</p>';
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, COLLECTIONS.products, [
+      Query.equal('sellerId',currentUser.$id), Query.orderDesc('$createdAt')
+    ]);
+    if (!res.documents.length) { container.innerHTML = '<p style="text-align:center;opacity:0.6;">Bado hujaweka bidhaa</p>'; return; }
+    container.innerHTML = '';
+    res.documents.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.style.borderLeft = '3px solid #f9ab00';
+      card.innerHTML = `
+        <span class="badge ${p.status==='available'?'available':'sold'}">${p.status==='available'?'Inapatikana':'Imeuzwa'}</span>
+        <h4 style="margin:6px 0;">${p.name}</h4>
+        <div class="price" style="font-size:16px;">TZS ${formatPrice(p.price)}</div>
+        <small>📅 ${formatDate(p.$createdAt)}</small>
+        <div class="actions" style="margin-top:5px;">
+          ${p.status==='available'?`<button onclick="handleMarkSold('${p.$id}')" class="secondary" style="font-size:11px;">✅ Imekwisha</button><button onclick="openEditModal('${p.$id}')" class="edit-btn" style="font-size:11px;">✏️</button>`:''}
+          <button onclick="handleDeleteProduct('${p.$id}')" class="danger" style="font-size:11px;">🗑️ Futa</button>
+        </div>`;
+      container.appendChild(card);
+    });
+  } catch (e) { container.innerHTML = '<p style="color:#ff6b6b;">Imeshindwa</p>'; }
+};
+
+window.openEditModal = async (id) => {
+  try {
+    const p = await databases.getDocument(DATABASE_ID, COLLECTIONS.products, id);
+    editingProductId = id;
+    document.getElementById('edit-product-name').value = p.name;
+    document.getElementById('edit-product-price').value = p.price;
+    document.getElementById('edit-product-desc').value = p.description || '';
+    document.getElementById('edit-product-modal').style.display = 'flex';
+  } catch (e) { showToast('Imeshindwa', 'error'); }
+};
+window.closeEditModal = () => { document.getElementById('edit-product-modal').style.display = 'none'; editingProductId = null; };
+window.saveEditProduct = async () => {
+  if (!editingProductId) return;
+  const name = val('edit-product-name'), price = val('edit-product-price'), desc = val('edit-product-desc');
+  if (!name || !price) { showToast('Jaza jina na bei', 'error'); return; }
+  showLoading();
+  try {
+    await databases.updateDocument(DATABASE_ID, COLLECTIONS.products, editingProductId, { name, price: Number(price), description: desc });
+    showToast('Imebadilishwa ✅', 'success');
+    closeEditModal(); loadProducts(); loadMyProducts();
+  } catch (e) { showToast('Imeshindwa', 'error'); }
+  finally { hideLoading(); }
+};
+window.handleDeleteProduct = async (id) => {
+  if (!confirm('Futa bidhaa hii?')) return;
+  showLoading();
+  try { await databases.deleteDocument(DATABASE_ID, COLLECTIONS.products, id); showToast('Imefutwa 🗑️', 'success'); loadProducts(); loadMyProducts(); }
+  catch (e) { showToast('Imeshindwa', 'error'); }
+  finally { hideLoading(); }
+};
+window.handleMarkSold = async (id) => {
+  try { await databases.updateDocument(DATABASE_ID, COLLECTIONS.products, id, { status: 'sold' }); showToast('Imewekwa imeuzwa ✅', 'success'); loadProducts(); loadMyProducts(); }
+  catch (e) { showToast('Imeshindwa', 'error'); }
+};
+
+// ==================== BUY ====================
+window.handleBuy = async (productId, sellerId, productName, productPrice) => {
+  if (sellerId === currentUser.$id) { showToast('Huwezi kununua bidhaa yako', 'error'); return; }
+  showLoading();
+  try {
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.orders, ID.unique(), {
+      productId, productName, productPrice: Number(productPrice),
+      buyerId: currentUser.$id, buyerName: currentUserProfile?.name || 'Mwanafunzi',
+      buyerPhone: currentUserProfile?.phone || '', sellerId, status: 'pending'
+    });
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.notifications, ID.unique(), {
+      userId: sellerId, title: 'Agizo Jipya! 🎉',
+      message: `${currentUserProfile?.name||'Mwanafunzi'} amenunua ${productName} kwa TZS ${formatPrice(productPrice)}`,
+      type: 'new_order', read: false
+    });
+    showToast('Agizo limesafirishwa!', 'success');
+    loadProducts();
+  } catch (e) { showToast('Imeshindwa', 'error'); }
+  finally { hideLoading(); }
+};
+
+// ==================== ORDERS ====================
+window.loadMyOrders = async (type = 'all') => {
+  const container = document.getElementById('orders-container');
+  if (!currentUser) return;
+  container.innerHTML = '<div style="text-align:center;padding:20px;"><div class="spinner"></div></div>';
+  try {
+    let orders = [];
+    if (type === 'buyer' || type === 'all') {
+      const r = await databases.listDocuments(DATABASE_ID, COLLECTIONS.orders, [Query.equal('buyerId',currentUser.$id), Query.orderDesc('$createdAt')]);
+      r.documents.forEach(d => orders.push({...d, orderType:'buyer'}));
+    }
+    if (type === 'seller' || type === 'all') {
+      const r = await databases.listDocuments(DATABASE_ID, COLLECTIONS.orders, [Query.equal('sellerId',currentUser.$id), Query.orderDesc('$createdAt')]);
+      r.documents.forEach(d => { if (!orders.find(o => o.$id===d.$id)) orders.push({...d, orderType:'seller'}); });
+    }
+    orders.sort((a,b) => new Date(b.$createdAt) - new Date(a.$createdAt));
+    if (!orders.length) { container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>Hakuna maagizo</p></div>'; return; }
+    container.innerHTML = '';
+    orders.forEach(o => {
+      const colors = { pending: '#ff9800', confirmed: '#2196F3', completed: '#4CAF50', cancelled: '#f44336' };
+      const card = document.createElement('div');
+      card.className = 'order-card';
+      card.innerHTML = `
+        <span class="badge" style="background:${colors[o.status]||'#666'}">${o.status}</span>
+        <h4 style="margin:6px 0;">${o.productName||'Bidhaa'}</h4>
+        <p style="font-size:13px;">${o.orderType==='buyer'?'🛒 Umenunua':'💰 Umeuza'} | TZS ${formatPrice(o.productPrice)}</p>
+        <p style="font-size:12px;opacity:0.7;">${o.orderType==='buyer'?'Muuzaji':'Mnunuzi'}: ${o.orderType==='buyer'?(o.sellerName||'?'):(o.buyerName||'?')}</p>
+        <small>📅 ${formatDate(o.$createdAt)}</small>
+        ${o.status==='pending'?`<div style="display:flex;gap:5px;margin-top:8px;">${o.orderType==='seller'?`<button onclick="handleUpdateOrder('${o.$id}','confirmed')" style="font-size:11px;">✅ Thibitisha</button>`:''}<button onclick="handleUpdateOrder('${o.$id}','cancelled')" class="secondary" style="font-size:11px;">❌ Futa</button></div>`:''}`;
+      container.appendChild(card);
+    });
+  } catch (e) { container.innerHTML = '<p style="color:#ff6b6b;">Imeshindwa</p>'; }
+};
+window.handleUpdateOrder = async (id, status) => {
+  try {
+    await databases.updateDocument(DATABASE_ID, COLLECTIONS.orders, id, { status });
+    showToast(status==='confirmed'?'Imethibitishwa ✅':status==='completed'?'Imekamilika 🎉':'Imefutwa ❌', 'success');
+    loadMyOrders('all');
+  } catch (e) { showToast('Imeshindwa', 'error'); }
+};
+
+// ==================== PROFILE ====================
+window.loadProfile = async () => {
+  const container = document.getElementById('profile-info');
+  if (!currentUserProfile) { container.innerHTML = '<p>Haikupatikana</p>'; return; }
+  const p = currentUserProfile;
+  container.innerHTML = `
+    <div style="text-align:center;margin-bottom:15px;">
+      ${p.profilePic ? `<img src="${p.profilePic}" alt="Profile" class="profile-pic">` : `<div class="profile-pic-placeholder">${p.name?.charAt(0)?.toUpperCase()||'👤'}</div>`}
+    </div>
+    <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin:8px 0;"><small>JINA</small><p style="font-weight:bold;">${p.name||'Haijawekwa'}</p></div>
+    <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin:8px 0;"><small>EMAIL</small><p style="font-weight:bold;">${p.email||'Haijawekwa'}</p></div>
+    <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin:8px 0;"><small>SIMU</small><p style="font-weight:bold;">${p.phone||'Haijawekwa'}</p></div>
+    <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin:8px 0;"><small>AINA</small><p style="font-weight:bold;">${p.role==='admin'?'👑 Admin':p.role==='seller'?'Muuzaji':'Mnunuzi'}</p></div>
+    <button onclick="openProfileModal()" class="edit-btn" style="margin-top:10px;">✏️ Badilisha Profaili</button>
+    <button onclick="handleDeleteAccount()" class="danger" style="margin-top:5px;">🗑️ Futa Akaunti</button>`;
+};
+window.openProfileModal = () => {
+  if (!currentUserProfile) return;
+  document.getElementById('edit-profile-name').value = currentUserProfile.name || '';
+  document.getElementById('edit-profile-phone').value = currentUserProfile.phone || '';
+  const prev = document.getElementById('edit-profile-preview');
+  const ph = document.getElementById('edit-profile-placeholder');
+  if (currentUserProfile.profilePic) { prev.src = currentUserProfile.profilePic; prev.style.display = 'block'; ph.style.display = 'none'; }
+  else { prev.style.display = 'none'; ph.style.display = 'flex'; ph.textContent = currentUserProfile.name?.charAt(0)?.toUpperCase() || '👤'; }
+  document.getElementById('edit-profile-image').value = '';
+  editingProfilePicFile = null;
+  document.getElementById('edit-profile-modal').style.display = 'flex';
+};
+window.closeProfileModal = () => { document.getElementById('edit-profile-modal').style.display = 'none'; editingProfilePicFile = null; };
+document.getElementById('edit-profile-image').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  editingProfilePicFile = file;
+  const reader = new FileReader();
+  reader.onload = (ev) => { document.getElementById('edit-profile-preview').src = ev.target.result; document.getElementById('edit-profile-preview').style.display = 'block'; document.getElementById('edit-profile-placeholder').style.display = 'none'; };
+  reader.readAsDataURL(file);
+});
+window.saveEditProfile = async () => {
+  if (!currentUserProfile) return;
+  const name = val('edit-profile-name'), phone = val('edit-profile-phone');
+  if (!name || !phone) { showToast('Jaza jina na simu', 'error'); return; }
+  showLoading();
+  try {
+    const data = { name, phone };
+    if (editingProfilePicFile) {
+      const up = await storage.createFile(BUCKET_ID, ID.unique(), editingProfilePicFile);
+      data.profilePic = storage.getFileView(BUCKET_ID, up.$id).toString();
+    }
+    await databases.updateDocument(DATABASE_ID, COLLECTIONS.users, currentUserProfile.$id, data);
+    currentUserProfile = await databases.getDocument(DATABASE_ID, COLLECTIONS.users, currentUserProfile.$id);
+    showToast('Profaili imebadilishwa ✅', 'success');
+    closeProfileModal(); loadProfile();
+  } catch (e) { showToast('Imeshindwa', 'error'); }
+  finally { hideLoading(); }
+};
+
+// ==================== CHAT ====================
+window.openChat = async (partnerId, partnerName, productId, productName) => {
+  if (partnerId === currentUser.$id) { showToast('Huwezi kujichatia mwenyewe', 'error'); return; }
+  currentChatPartner = { id: partnerId, name: partnerName };
+  currentChatProduct = { id: productId, name: productName };
+  ['market','sell','orders','profile','admin','about','help'].forEach(t => {
+    const el = document.getElementById(`tab-${t}`); if (el) el.style.display = 'none';
+  });
+  document.getElementById('tab-chat').style.display = 'block';
+  document.getElementById('chat-partner-name').textContent = `💬 ${partnerName}`;
+  document.getElementById('chat-product-info').textContent = `Kuhusu: ${productName}`;
+  document.getElementById('chat-message-input').value = '';
+  loadChatMessages();
+};
+window.loadChatMessages = async () => {
+  if (!currentChatPartner || !currentUser) return;
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = '<p style="text-align:center;opacity:0.6;">Inapakia...</p>';
+  try {
+    const res1 = await databases.listDocuments(DATABASE_ID, COLLECTIONS.messages, [
+      Query.equal('senderId', currentUser.$id), Query.equal('receiverId', currentChatPartner.id), Query.equal('productId', currentChatProduct.id)
+    ]);
+    const res2 = await databases.listDocuments(DATABASE_ID, COLLECTIONS.messages, [
+      Query.equal('senderId', currentChatPartner.id), Query.equal('receiverId', currentUser.$id), Query.equal('productId', currentChatProduct.id)
+    ]);
+    let messages = [...res1.documents, ...res2.documents];
+    messages.sort((a, b) => new Date(a.$createdAt) - new Date(b.$createdAt));
+    if (!messages.length) { container.innerHTML = '<p style="text-align:center;opacity:0.5;padding:30px;">Anza mazungumzo sasa 👋</p>'; return; }
+    container.innerHTML = '';
+    messages.forEach(msg => {
+      const isMine = msg.senderId === currentUser.$id;
+      const div = document.createElement('div');
+      div.className = isMine ? 'chat-bubble-mine' : 'chat-bubble-theirs';
+      div.innerHTML = `<div style="font-size:13px;">${msg.message}</div><div style="font-size:10px;opacity:0.6;margin-top:4px;">${formatDate(msg.$createdAt)}</div>`;
+      container.appendChild(div);
+    });
+    container.scrollTop = container.scrollHeight;
+  } catch (e) { container.innerHTML = '<p style="color:#ff6b6b;">Imeshindwa kupakia</p>'; }
+};
+window.sendChatMessage = async () => {
+  const message = val('chat-message-input');
+  if (!message || !currentChatPartner || !currentUser) return;
+  document.getElementById('chat-message-input').value = '';
+  try {
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.messages, ID.unique(), {
+      senderId: currentUser.$id, receiverId: currentChatPartner.id,
+      senderName: currentUserProfile?.name || 'Mwanafunzi', receiverName: currentChatPartner.name,
+      productId: currentChatProduct.id, productName: currentChatProduct.name,
+      message: message, read: false
+    });
+    await databases.createDocument(DATABASE_ID, COLLECTIONS.notifications, ID.unique(), {
+      userId: currentChatPartner.id, title: 'Ujumbe Mpya 💬',
+      message: `${currentUserProfile?.name || 'Mwanafunzi'} amekutumia ujumbe kuhusu ${currentChatProduct.name}`,
+      type: 'new_message', read: false
+    });
+    loadChatMessages();
+  } catch (e) { showToast('Imeshindwa kutuma', 'error'); }
+};
+window.closeChat = () => {
+  currentChatPartner = null; currentChatProduct = null;
+  document.getElementById('tab-chat').style.display = 'none';
+  showTab('market');
+};
+
+// ==================== ADMIN PANEL ====================
+window.loadAdminPanel = async () => {
+  if (currentUserProfile?.role !== 'admin') { document.getElementById('tab-admin').innerHTML = '<p style="text-align:center;">Huna ruhusa</p>'; return; }
+  showLoading();
+  try {
+    const [users, products, orders] = await Promise.all([
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.users, [Query.orderDesc('$createdAt')]),
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.products, [Query.orderDesc('$createdAt')]),
+      databases.listDocuments(DATABASE_ID, COLLECTIONS.orders, [Query.orderDesc('$createdAt')])
+    ]);
+    document.getElementById('admin-stats').innerHTML = `
+      <div class="stat-card"><div class="stat-number">${users.total}</div><div class="stat-label">Watumiaji</div></div>
+      <div class="stat-card"><div class="stat-number">${products.total}</div><div class="stat-label">Bidhaa</div></div>
+      <div class="stat-card"><div class="stat-number">${orders.total}</div><div class="stat-label">Maagizo</div></div>`;
+    let userHTML = '';
+    users.documents.forEach(u => {
+      userHTML += `<tr><td>${u.name||'?'}</td><td>${u.email||'?'}</td><td>${u.role||'?'}</td><td><button onclick="adminDeleteUser('${u.$id}')" class="danger" style="font-size:10px;padding:5px 8px;">🗑️</button></td></tr>`;
+    });
+    document.getElementById('admin-users-container').innerHTML = `<table class="admin-table">${userHTML}</table>`;
+    let prodHTML = '';
+    products.documents.forEach(p => {
+      prodHTML += `<tr><td>${p.name||'?'}</td><td>${p.sellerName||'?'}</td><td>${p.status||'?'}</td><td><button onclick="handleDeleteProduct('${p.$id}')" class="danger" style="font-size:10px;padding:5px 8px;">🗑️</button></td></tr>`;
+    });
+    document.getElementById('admin-products-container').innerHTML = `<table class="admin-table">${prodHTML}</table>`;
+  } catch (e) { showToast('Imeshindwa kupakia admin', 'error'); }
+  finally { hideLoading(); }
+};
+window.adminDeleteUser = async (docId) => {
+  if (!confirm('Futa mtumiaji huyu?')) return;
+  try { await databases.deleteDocument(DATABASE_ID, COLLECTIONS.users, docId); showToast('Mtumiaji amefutwa', 'success'); loadAdminPanel(); }
+  catch (e) { showToast('Imeshindwa', 'error'); }
+};
+
+// ==================== EXPORTS ====================
+window.loadProducts = loadProducts;
+window.loadMyProducts = loadMyProducts;
+window.loadMyOrders = loadMyOrders;
+window.loadProfile = loadProfile;
+window.handleBuy = handleBuy;
+window.handleMarkSold = handleMarkSold;
+window.handleUpdateOrder = handleUpdateOrder;
+window.handleUploadProduct = handleUploadProduct;
+window.handleDeleteProduct = handleDeleteProduct;
+window.handleDeleteAccount = handleDeleteAccount;
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.saveEditProduct = saveEditProduct;
+window.openProfileModal = openProfileModal;
+window.closeProfileModal = closeProfileModal;
+window.saveEditProfile = saveEditProfile;
+window.loadAdminPanel = loadAdminPanel;
+window.adminDeleteUser = adminDeleteUser;
+window.handleSearch = handleSearch;
+window.openChat = openChat;
+window.loadChatMessages = loadChatMessages;
+window.sendChatMessage = sendChatMessage;
+window.closeChat = closeChat;
+
+console.log('✅ JoeCampus Market READY!');
+</script>
+</body>
+</html>
