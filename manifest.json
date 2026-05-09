@@ -1,0 +1,27 @@
+{
+  "name": "JoeCampus Market",
+  "short_name": "JoeCampus",
+  "description": "Nunua na Uuze bidhaa vyuoni kwa urahisi",
+  "start_url": "/joecampus-market/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#f9ab00",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "splash_screen": {
+    "background_color": "#1a1a2e"
+  }
+}
