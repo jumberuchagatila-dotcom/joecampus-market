@@ -1,0 +1,14 @@
+const CACHE_NAME = 'joecampus-v1';
+const urlsToCache = [
+  '/joecampus-market/',
+  '/joecampus-market/index.html',
+  '/joecampus-market/logo.png',
+  '/joecampus-market/background.png',
+  '/joecampus-market/manifest.json'
+];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(urlsToCache)));
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+});
