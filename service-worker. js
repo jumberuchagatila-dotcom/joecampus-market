@@ -1,0 +1,48 @@
+const CACHE_NAME = 'joecampus-chat-v1';
+
+// Install Service Worker
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll([
+        '/joecampus-market/',
+        '/joecampus-market/index.html',
+        '/joecampus-market/logo.png',
+        '/joecampus-market/background.png',
+        '/joecampus-market/manifest.json'
+      ]);
+    })
+  );
+});
+
+// Fetch from cache
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
+  );
+});
+
+// Listen for messages from main thread (Push Notifications)
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
+    const options = {
+      body: event.data.message,
+      icon: 'logo.png',
+      badge: 'logo.png',
+      vibrate: [200, 100, 200],
+      tag: 'joecampus',
+      requireInteraction: true
+    };
+    self.registration.showNotification(event.data.title, options);
+  }
+});
+
+// Handle notification click - opens the app
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/joecampus-market/')
+  );
+});
