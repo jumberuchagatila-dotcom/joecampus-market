@@ -1,6 +1,5 @@
 const CACHE_NAME = 'joecampus-chat-v1';
 
-// Install Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
@@ -15,7 +14,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Fetch from cache
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
@@ -24,7 +22,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Listen for messages from main thread (Push Notifications)
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     const options = {
@@ -39,7 +36,6 @@ self.addEventListener('message', event => {
   }
 });
 
-// Handle notification click - opens the app
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
