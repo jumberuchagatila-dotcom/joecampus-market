@@ -1,11 +1,11 @@
 {
-  "name": "JoeCampus Market",
-  "short_name": "JoeCampus",
-  "description": "Nunua na Uuze bidhaa vyuoni kwa urahisi",
+  "name": "JoeChat",
+  "short_name": "JoeChat",
+  "description": "Wasiliana na wanafunzi wenzako kwa urahisi",
   "start_url": "/joecampus-market/",
   "display": "standalone",
   "background_color": "#1a1a2e",
-  "theme_color": "#f9ab00",
+  "theme_color": "#25D366",
   "orientation": "portrait",
   "icons": [
     {
@@ -20,8 +20,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "splash_screen": {
-    "background_color": "#1a1a2e"
-  }
+  ]
 }
