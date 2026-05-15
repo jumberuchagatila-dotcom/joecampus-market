@@ -1,4 +1,4 @@
-const CACHE_NAME = 'joecampus-chat-v1';
+const CACHE_NAME = 'joechat-v1';
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -29,7 +29,7 @@ self.addEventListener('message', event => {
       icon: 'logo.png',
       badge: 'logo.png',
       vibrate: [200, 100, 200],
-      tag: 'joecampus',
+      tag: 'joechat',
       requireInteraction: true
     };
     self.registration.showNotification(event.data.title, options);
